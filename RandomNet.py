@@ -124,7 +124,7 @@ def GaussianRandomInput(N = 30, rho = None):
         rho = 0.05 * N
     N2 = N*N
     # corvariance matrix [-1,1]
-    CorMat = (np.random.rand(N2,N2)-np.random.rand(N2,N2))*rho/N
+    CorMat = (np.random.rand(N2,N2)-np.random.rand(N2,N2))*rho/N2
     # symmetrization
     CorMat = (CorMat + CorMat.T)/2
     CorMatABS = np.absolute(CorMat)
@@ -149,6 +149,7 @@ def GaussianRandomInput(N = 30, rho = None):
     return x.reshape(N,N)
 
 # return the list of dim for each layer and channel
+# ensemble_num >= 20
 def RandomNetDim(net, input_size = 30, rho = None, ensemble_num = 10000):
     # each hihj_vec[layer idx][channel idx] is a list consists of one array element
     hihj_vec = [[[] for j in range(net.struct[i])] for i in range(net.layer_len)]
@@ -164,6 +165,8 @@ def RandomNetDim(net, input_size = 30, rho = None, ensemble_num = 10000):
             hihj_vec[l][c].append(np.zeros([h_size[l]*h_size[l],h_size[l]*h_size[l]]))
             hi_vec[l][c].append(np.zeros([1,h_size[l]*h_size[l]]))
     for n in range(ensemble_num):
+        if n % (ensemble_num//20) == 0:
+            print('Process: {0} %'.format(100 * n/ensemble_num))
         input_sample = GaussianRandomInput(input_size,rho)
         net.forward(input_sample)
         for l in range(1,net.layer_len):
